@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Quiz Dependency Module
+ *
+ * This module adds a section to quiz availability form which allows quizes to only become 
+ * available once once a previous quiz has been completed, passed or failed. Currently it only supports
+ * one dependency, but in the future the fields will be made as a field collection to support
+ * multiple dependencies. 
+ */
+
+/* 
+ * Implements hook_quiz_check_availability_alter
+ */
+
+function quiz_dependency_quiz_availability_check_alter(&$result, $quiz) {
+  global $user;
+  if ($quiz->field_quiz_deps_nid) {
+    $quiz_data = current(quiz_get_score_data(array(0 => $quiz->field_quiz_deps_nid['und'][0]['target_id']), $user->uid));
+    if (($quiz->field_quiz_deps_type['und'][0]['value'] == 'completed' && empty($quiz_data)) || ($quiz->field_quiz_deps_type['und'][0]['value'] == 'passed' && $quiz_data->percent_score < $quiz_data->percent_pass) || ($quiz->field_quiz_deps_type['und'][0]['value'] == 'failed' && $quiz_data->percent_score >= $quiz_data->percent_pass)) {
+      $dep_node = node_load($quiz->field_quiz_deps_nid['und'][0]['target_id']);
+      $t_args = array(
+        '@type' =>  $quiz->field_quiz_deps_type['und'][0]['value'],
+        '!title' => l(drupal_placeholder($dep_node->title), 'node/' . $quiz->field_quiz_deps_nid['und'][0]['target_id'], array('html' => TRUE)),
+      );
+      $result = t('Sorry this quiz is not available due to a dependencies on !title.', $t_args);
+    }
+  }
+}

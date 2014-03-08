@@ -1,0 +1,5 @@
+name = Quiz Dependency
+package = Quiz Addon 
+description = "Adds dependencies to quiz availability."
+dependencies[] = quiz 
+core = 7.x

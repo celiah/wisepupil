@@ -1,0 +1,261 @@
+<?php
+
+/**
+ * @file
+ * Quiz dependency install schema
+ *
+ */
+
+/**
+ * Implements hook_install().
+ */
+function quiz_deps_install() {
+  if (!field_info_field('field_quiz_deps_nid')) {
+    $field = array(
+      'translatable' => '0',
+      'entity_types' => array(),
+      'settings' => array(
+        'target_type' => 'node',
+        'handler' => 'base',
+        'handler_submit' => 'Change handler',
+        'handler_settings' => array(
+          'target_bundles' => array(
+            'quiz' => 'quiz',
+          ),
+          'sort' => array(
+            'type' => 'property',
+            'property' => 'title',
+            'field' => 'body:value',
+            'direction' => 'ASC',
+          ),
+        ),
+      ),
+      'storage' => array(
+        'type' => 'field_sql_storage',
+        'settings' => array(),
+        'module' => 'field_sql_storage',
+        'active' => '1',
+        'details' => array(
+          'sql' => array(
+            'FIELD_LOAD_CURRENT' => array(
+              'field_data_field_quiz_deps_nid' => array(
+                'target_id' => 'field_quiz_deps_nid_target_id',
+                'target_type' => 'field_quiz_deps_nid_target_type',
+              ),
+            ),
+            'FIELD_LOAD_REVISION' => array(
+              'field_revision_field_quiz_deps_nid' => array(
+                'target_id' => 'field_quiz_deps_nid_target_id',
+                'target_type' => 'field_quiz_deps_nid_target_type',
+              ),
+            ),
+          ),
+        ),
+      ),
+      'foreign keys' => array(),
+      'indexes' => array(
+        'target_entity' => array(
+          0 => 'target_type',
+          1 => 'target_id',
+        ),
+      ),
+      'field_name' => 'field_quiz_deps_nid',
+      'type' => 'entityreference',
+      'module' => 'entityreference',
+      'active' => '1',
+      'locked' => '0',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'columns' => array(
+        'target_id' => array(
+          'description' => 'The id of the target entity',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => FALSE,
+        ),
+        'target_type' => array(
+          'description' => 'The type of the target entity',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ),
+      ),
+      'bundles' => array(
+        'node' => array(
+          0 => 'quiz',
+        ),
+      ),
+    );
+    field_create_field($field);
+  }
+  // create the quiz dependent type field
+  if (!field_info_field('field_quiz_deps_type')) {
+    $field = array(
+      'translatable' => '0',
+      'entity_types' => array(),
+      'settings' => array(
+        'allowed_values' => array(
+          'completed' => 'completed',
+          'passed' => 'passed',
+          'failed' => 'failed',
+        ),
+        'allowed_values_function' => '',
+      ),
+      'storage' => array(
+        'type' => 'field_sql_storage',
+        'settings' => array(),
+        'module' => 'field_sql_storage',
+        'active' => '1',
+        'details' => array(
+          'sql' => array(
+            'FIELD_LOAD_CURRENT' => array(
+              'field_data_field_quiz_deps_type' => array(
+                'value' => 'field_quiz_deps_type_value',
+              ),
+            ),
+            'FIELD_LOAD_REVISION' => array(
+              'field_revision_field_quiz_deps_type' => array(
+                'value' => 'field_quiz_deps_type_value',
+              ),
+            ),
+          ),
+        ),
+      ),
+      'foreign keys' => array(),
+      'indexes' => array(
+        'value' => array(
+          0 => 'value',
+        ),
+      ),
+      'field_name' => 'field_quiz_deps_type',
+      'type' => 'list_text',
+      'module' => 'list',
+      'active' => '1',
+      'locked' => '0',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'columns' => array(
+        'value' => array(
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => FALSE,
+        ),
+      ),
+      'bundles' => array(
+        'node' => array(
+          0 => 'quiz',
+        ),
+      ),
+    );
+    field_create_field($field);
+  }
+
+  if (!field_info_instance('quiz_deps', 'field_quiz_deps_nid', 'quiz')) {
+    $instance = array(
+      'field_name' => 'field_quiz_deps_nid',
+      'bundle' => 'quiz',
+      'entity_type' => 'node',
+      'label' => t('Dependent quiz'),
+      'description' => t('Select quizzes that must be completed, passed or failed prior to this one becoming available.'),
+      'widget' => array(
+          'weight' => '34',
+          'type' => 'entityreference_autocomplete',
+          'module' => 'entityreference',
+          'active' => 1,
+          'settings' => array(
+            'match_operator' => 'CONTAINS',
+            'size' => '60',
+            'path' => '',
+          ),
+        ),
+        'settings' => array(
+          'user_register_form' => FALSE,
+        ),
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'entityreference_label',
+            'settings' => array(
+              'link' => FALSE,
+            ),
+            'module' => 'entityreference',
+            'weight' => 4,
+          ),
+          'teaser' => array(
+            'type' => 'hidden',
+            'label' => 'above',
+            'settings' => array(),
+            'weight' => 0,
+          ),
+        ),
+        'required' => 0,
+        'default_value' => NULL,
+        'deleted' => '0',
+    );
+    field_create_instance($instance);
+  }
+  // create dependent type instance
+  if (!field_info_instance('quiz_deps', 'field_quiz_deps_type', 'quiz')) {
+    $instance = array(
+        'label' => 'Dependenct quiz type',
+        'widget' => array(
+          'weight' => '35',
+          'type' => 'options_select',
+          'module' => 'options',
+          'active' => 1,
+          'settings' => array(),
+        ),
+        'settings' => array(
+          'user_register_form' => FALSE,
+        ),
+        'display' => array(
+          'default' => array(
+            'label' => 'above',
+            'type' => 'list_default',
+            'settings' => array(),
+            'module' => 'list',
+            'weight' => 5,
+          ),
+          'teaser' => array(
+            'type' => 'hidden',
+            'label' => 'above',
+            'settings' => array(),
+            'weight' => 0,
+          ),
+        ),
+        'required' => 0,
+        'description' => 'The status of the dependent quiz',
+        'default_value' => NULL,
+        'field_name' => 'field_quiz_deps_type',
+        'entity_type' => 'node',
+        'bundle' => 'quiz',
+        'deleted' => '0',
+    ); 
+    field_create_instance($instance);
+  }
+  drupal_set_message(t('Quiz dependency module has been enabled.'));
+}
+
+/**
+ * Implements hook_schema().
+ */
+
+/**
+ * Implements hook_update_N()
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+
+function quiz_deps_uninstall() {
+  $field_name = 'field_quiz_deps_nid';
+  $instance = field_info_instance('quiz_deps', $field_name, 'quiz');
+  field_delete_instance($instance); 
+  field_delete_field($field_name); 
+  $field_name = 'field_quiz_deps_type';
+  $instance = field_info_instance('quiz_deps', $field_name, 'quiz');
+  field_delete_instance($instance); 
+  field_delete_field($field_name); 
+}
+
