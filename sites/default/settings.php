@@ -215,9 +215,9 @@ $databases = array (
   array (
     'default' => 
     array (
-      'database' => 'kumc_er101',
-      'username' => 'kumc_algarra',
-      'password' => '2n4a37vM',
+      'database' => 'wisepupil',
+      'username' => 'root',
+      'password' => '',
       'host' => 'localhost',
       'port' => '',
       'driver' => 'mysql',
